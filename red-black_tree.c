@@ -14,10 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #define red 0
 #define black 1
-
 typedef struct Node{
 	int color;
 	struct Node *left;
@@ -117,9 +115,10 @@ void print_tree(node *n){
 		print_tree(n->right);
 	}
 }
+/*algorithm not finished yet ! */
 int main(int argc, char *argv[])
 {
-	node *head=(node *)malloc(sizeof(node));
+	/*node *head=(node *)malloc(sizeof(node));
 	head->color=black;
 	head->left=NULL;
 	head->parent=NULL;
@@ -137,6 +136,7 @@ int main(int argc, char *argv[])
 	insert_case1(head);
 	insert_case1(doc);
 	insert_case1(pos);
+	*/
 	return 0;
 }
 
