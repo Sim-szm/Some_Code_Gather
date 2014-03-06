@@ -76,6 +76,19 @@ bool Delete_Node(BiTree *p){
 		free(q);
 	}
 	else{
-		/*....*/   
+		q=*p;
+		s=(*p)->lchild;
+		while(s->lchild){
+			q=s;
+			s=s->rchild;
+		}
+		(*p)->data=s->data;
+		if(q!=*p){
+			q->rchild=s->lchild;
+		}
+		else 
+			q->lchild=s->lchild;
+		free(s);
 	}
+	return true;
 }
