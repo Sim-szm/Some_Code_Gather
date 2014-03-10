@@ -63,7 +63,7 @@ typedef struct rbtree_check{
 
 void rbtree_init(rbtree_t *rbtree);
 
-void rbtree_insert_ndoe(rbtree_t *rbtree,rbtree_node_t *node);
+void rbtree_insert_node(rbtree_t *rbtree,rbtree_node_t *node);
 
 void rbtree_delete_node(rbtree_t *rbtree,rbtree_node_t *node);
 
