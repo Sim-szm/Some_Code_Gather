@@ -13,12 +13,51 @@
  */
 #include "rbtree.h"
 
+#define NIL(rbtree) \
+	(&((rbtree)->null))
+
 void rbtree_init(rbtree_t *rbtree){
-	
+	if(NULL!=rbtree){
+		rbtree_black(NIL(rbtree));
+		rbtree->root=NIL(rbtree);
+		rbtree->tree_size=0;
+	}
 }
 
 void rbtree_insert_node(rbtree_t *rbtree ,rbtree_node_t *node){
-
+	rbtree_node_t *p,*q;
+	if((NULL==rbtree) || (NULL==node) || (node==NIL(rbtree))){
+		errno=EINVAL;
+		return;
+	}
+	if(rbtree->root==NIL(rbtree)){
+		rbtree->root=node;
+		node->parent=NIL(rbtree);
+	}
+	else{
+		p=rbtree->root;
+		while(p!=NIL(rbtree)){
+			q=p;
+			if(node->key < p->key){
+				p=p->left;
+			}
+			else {
+				p=p->right;
+			}
+		}
+		node->parent=q;
+		if(node->key < q->key){
+			q->left=node;
+		}
+		else{
+			q->right=node;
+		}
+	}
+	node->left=NIL(rbtree);
+	node->right=NIL(rbtree);
+	rbtree_red(node);
+	rbtree_insert_adjust(rbtree,node);
+	rbtree->tree_size++;
 }
 
 void rbtree_delete_node(rbtree_t *rbtree ,rbtree_node_t *node){
