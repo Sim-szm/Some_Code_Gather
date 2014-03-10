@@ -14,6 +14,7 @@
 #ifndef RBTREE_H
 #define RBTREE_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -38,6 +39,13 @@ typedef struct rbtree{
 	rbtree_node_t null;
 }rbtree_t;
 
+typedef struct rbtree_check{
+	int height;
+	int depth;
+	int fini_flag;
+	rbtree_node_t *null;
+}rbtree_check_t;
+
 #define clear_rbtree_node(node) do{ 	\
 	node->parent=NULL; 	\
 	node->left=NULL;  	\
@@ -46,13 +54,17 @@ typedef struct rbtree{
 
 #define rbtree_is_empty(rbtree) \
 	((rbtree)->root==&(rbtree)->null)
+
 #define rbtree_max(rbtree) \
 	subrbtree_find_max_node((rbtree)->root,&(rbtree)->null)
+
 #define rbtree_min(rbtree) \
 	subrbtree_find_min_node((rbtree)->root,&(rbtree)->null)
 
 void rbtree_init(rbtree_t *rbtree);
+
 void rbtree_insert_ndoe(rbtree_t *rbtree,rbtree_node_t *node);
+
 void rbtree_delete_node(rbtree_t *rbtree,rbtree_node_t *node);
 
 rbtree_node_t* rbtree_search(rbtree_t *rbtree,int key);
@@ -64,5 +76,13 @@ rbtree_node_t* subrbtree_find_min_node(rbtree_node_t *rbtree,rbtree_node_t *sent
 rbtree_node_t* subrbtree_find_max_node(rbtree_node_t *rbtree,rbtree_node_t *sentinel);
 
 void rbtree_mid_travel(rbtree_t *rbtree,void* (*operator)(rbtree_node_t *,void *),void *node_data);
+
+static inline void rbtree_insert_adjust(rbtree_t *rbtree,rbtree_node_t *node);
+
+static inline void rbtree_delete_adjust(rbtree_t *rbtree,rbtree_node_t *node);
+
+static inline void rbtree_adjust_rotate_left(rbtree_t *rbtree,rbtree_node_t *node);
+
+static inline void rbtree_adjust_rotate_right(rbtree_t *rbtree,rbtree_node_t *node);
 
 #endif 
