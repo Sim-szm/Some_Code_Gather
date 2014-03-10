@@ -44,6 +44,13 @@ typedef struct rbtree{
 	node->right=NULL; 	\
 }while(0)  
 
+#define rbtree_is_empty(rbtree) \
+	((rbtree)->root==&(rbtree)->null)
+#define rbtree_max(rbtree) \
+	subrbtree_find_max_node((rbtree)->root,&(rbtree)->null)
+#define rbtree_min(rbtree) \
+	subrbtree_find_min_node((rbtree)->root,&(rbtree)->null)
+
 void rbtree_init(rbtree_t *rbtree);
 void rbtree_insert_ndoe(rbtree_t *rbtree,rbtree_node_t *node);
 void rbtree_delete_node(rbtree_t *rbtree,rbtree_node_t *node);
