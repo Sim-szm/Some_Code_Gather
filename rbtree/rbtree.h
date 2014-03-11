@@ -19,10 +19,10 @@
 #include <errno.h>
 
 extern int errno;
-#define rbtree_black(rbnode)        ((rbnode)->color=1)
-#define rbtree_red(rbnode)          ((rbnode)->color=0)
-#define rbtree_test_isblack(rbnode) ((rbnode)->color=1)
-#define rbtree_test_isred(rbnode)   ((rbnode)->color=0)
+#define rbtree_black(rbnode)        (((rbnode)->color)=1)
+#define rbtree_red(rbnode)          (((rbnode)->color)=0)
+#define rbtree_test_isblack(rbnode) (((rbnode)->color)==1)
+#define rbtree_test_isred(rbnode)   (((rbnode)->color)==0)
 
 typedef struct rbtree_node{
 	int color;
