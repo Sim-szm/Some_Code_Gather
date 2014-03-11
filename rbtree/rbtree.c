@@ -61,7 +61,71 @@ void rbtree_insert_node(rbtree_t *rbtree ,rbtree_node_t *node){
 }
 
 void rbtree_delete_node(rbtree_t *rbtree ,rbtree_node_t *node){
-
+	int black_value;
+	rbtree_node_t *temp,*sub;
+	if((NULL==rbtree)||(NULL==node)||(node==NIL(rbtree))){
+		errno=EINVAL;
+		return;
+	}
+	if(node->left==NIL(rbtree)){
+		temp=node;
+		sub=node->right;
+	}
+	else{
+		temp=subrbtree_find_min_node(node->right,NIL(rbtree));
+		if(temp->left!=NIL(rbtree)){
+			sub=temp->left;
+		}
+		else{
+			sub=temp->right;
+		}
+	}
+	if(temp==rbtree->root){
+		rbtree->root=sub;
+		rbtree_black(sub);
+		clear_rbtree_node(temp);
+		return;
+	}
+	black_value=rbtree_test_isblack(temp);
+	if(temp->parent==node){
+		sub->parent=temp;
+	}
+	else{
+		sub->parent=temp->parent;
+	}
+	if(temp==temp->parent->left){
+		temp->parent->left=sub;
+	}
+	else{
+		temp->parent->right=sub;
+	}
+	if(temp!=node){
+		temp->parent=node->parent;
+		if(node==rbtree->root){
+			rbtree->root=temp;
+		}
+		else{
+			if(node->parent->left==node){
+				node->parent->left=temp;
+			}
+			else{
+				node->parent->right=temp;
+			}
+		}
+		temp->right=node->right;
+		temp->left=node->left;
+		if(temp->left!=NIL(rbtree)){
+			temp->left->parent=temp;
+		}
+		if(temp->right!=NIL(rbtree)){
+			temp->right->parent=temp;
+		}
+		temp->color=node->color;
+	}
+	clear_rbtree_node(node);
+	if(black_value){
+		rbtree_delete_adjust(rbtree,sub);
+	}
 }
 
 rbtree_node_t* rbtree_search(rbtree_t *rbtree,int key){
