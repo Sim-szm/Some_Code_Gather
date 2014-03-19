@@ -14,14 +14,12 @@
 #ifndef FILTER_STRING_CREW_H
 #define FILTER_STRING_CREW_H
 
-#include <unistd.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ptrhead.h>
-#include <sys/types.h>
+#include <errno.h>
+#include <pthread.h>
 #include <dirent.h>
-#include <sys/stat.h>
 #include <string.h>
 
 #define work_crew_size 4
@@ -48,7 +46,7 @@ typedef struct worker_tag{
 typedef struct crew_tag{
 	int count_crew_size;
 	worker_t crew_member[work_crew_size];
-	pthead_mutex_t mutex;
+	pthread_mutex_t mutex;
 	pthread_cond_t start;
 	pthread_cond_t done;
 	work_t *first,*end;

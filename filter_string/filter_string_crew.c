@@ -11,6 +11,9 @@
  *
  * =====================================================================================
  */
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "filter_string_crew.h"
 
 int init_worker_crew(crew_t *crew,int crew_size){
@@ -34,7 +37,7 @@ int init_worker_crew(crew_t *crew,int crew_size){
 		crew->crew_member[index].thread_index=index;
 		crew->crew_member[index].crew=crew;
 		status=pthread_create(&crew->crew_member[index].trhead_id,   \
-					NULL,thread_routine,(void*)crew->&crew_member[index]);
+					NULL,thread_routine,(void*)&crew->crew_member[index]);
 		assert(status==0);
 	}
 	return 0;
@@ -58,7 +61,7 @@ void *thread_routine(void *arg){
 	printf("crew %d starting !\n",tran->thread_index);
 	/*Now there is work here, we should doing it !*/
 	while(1){
-		pthead_mutex_lock(&crew->mutex);
+		pthread_mutex_lock(&crew->mutex);
 		if(crew->first==NULL){
 			status=pthread_cond_wait(&crew->start,&crew->mutex);
 			assert(status==0);
