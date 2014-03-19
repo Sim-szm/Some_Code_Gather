@@ -176,3 +176,57 @@ void *thread_routine(void *arg){
 	free(entry);
 	return NULL;
 }
+
+int crew_start(crew_p crew,char *filepath,char *search_string){
+	work_p request;
+
+	pthread_mutex_lock(&crew->mutex);
+	while(crew->work_count>0){
+		if(pthread_cond_wait(&crew->done,&crew->mutex)!=0){
+			pthread_mutex_unlock(&crew->mutex);
+			return 1;
+		}
+	}
+	errno=0;
+	path_str_max=pathconf(filepath,_PC_PATH_MAX);
+	if(path_str_max==-1){
+		if(errno==0)
+		      path_str_max=1024;
+		else
+		      printf("unable to get path_max");
+	}
+	errno=0;
+	name_str_max=pathconf(filepath,_PC_NAME_MAX);
+	if(name_str_max==-1){
+		if(errno==0)
+		      name_str_max=256;
+		else
+		      printf("unbale to get name_max");
+	}
+	path_str_max++;
+	name_str_max++;
+	request=(work_p)malloc(sizeof(work_t));
+	if(request==NULL){
+		errno=EINVAL;
+	}
+	request->path=(char*)malloc(sizeof(path_str_max));
+	strcpy(request->path,filepath);
+	request->string=search_string;
+	request->next=NULL;
+	if(crew->first==NULL){
+		crew->first=request;
+		crew->end=request;
+	}else{
+		crew->end->next=request;
+		crew->end=request;
+	}
+
+	crew->work_count++;
+	pthread_cond_signal(&crew->start);
+
+	if(crew->work_count>0){
+		pthread_cond_wait(&crew->done,&crew->mutex);
+	}
+	pthread_mutex_unlock(&crew->mutex);
+	return 0;
+}
