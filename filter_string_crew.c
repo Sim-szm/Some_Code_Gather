@@ -14,7 +14,7 @@
 #include "filter_string_crew.h"
 
 int init_worker_crew(crew_t *crew,int crew_size){
-	int stu;
+	int status;
 	if(crew_size>=work_crew_size){
 		errno=EINVAL;
 		return 1;
@@ -33,9 +33,9 @@ int init_worker_crew(crew_t *crew,int crew_size){
 	for(int index=0;index<work_crew_size;index++){
 		crew->crew_member[index].thread_index=index;
 		crew->crew_member[index].crew=crew;
-		stu=pthread_create(&crew->crew_member[index].trhead_id,   \
+		status=pthread_create(&crew->crew_member[index].trhead_id,   \
 					NULL,thread_routine,(void*)crew->&crew_member[index]);
-		assert(stu==0);
+		assert(status==0);
 	}
 	return 0;
 }
@@ -65,5 +65,114 @@ void *thread_routine(void *arg){
 		}
 		work=crew->first;
 		crew->first=work->next;
+		if(crew->first==NULL){
+			crew->end=NULL;
+		}
+		pthread_mutex_unlock(&crew->mutex);
+
+		/*have a work ,process it*/
+		status=lstat(work->path,&filestat);
+		/*part one : if it was a link */
+		if(S_ISLNK(filestat.st_mode)){
+			printf("thread %d:%s is a link,skipping.\n",\
+						tran->thread_index,work->path);
+		}
+		/*part two: if it was a directory */
+		else if(S_ISDIR(filestat.st_mode)){
+			DIR *directory;
+			struct dirent *as;
+			directory=opendir(work->path);
+			if(directory==NULL){
+				errno=EINVAL;
+				continue;
+			}
+			while(1){
+				status=readdir_r(directory,entry,&as);
+				if(status!=0){
+					printf("unable to read directory %s\n",\
+								work->path);
+					errno=status;
+					break;
+				}
+				if(as==NULL)
+				      break;
+				/*skipping ./ ../ */
+				if(strcmp(entry->d_name,".")==0)
+				      continue;
+				if(strcmp(entry->d_name,"..")==0)
+				      continue;
+				new_work=(work_t*)malloc(sizeof(work_t));
+				assert(new_work!=NULL);
+				new_work->path=(char*)malloc(sizeof(path_str_max));
+				assert((new_work->path)!=NULL);
+				strcpy(new_work->path,work->path);
+				strcat(new_work->path,"/");
+				strcat(new_work->path,entry->d_name);
+				new_work->string=work->string;
+				new_work->next=NULL;
+
+				pthread_mutex_lock(&crew->mutex);
+				if(crew->first==NULL){
+					crew->first=new_work;
+					crew->end=new_work;
+				}else{
+					crew->end->next=new_work;
+					crew->end=new_work;
+				}
+				crew->work_count++;
+				pthread_cond_signal(&crew->start);
+				status=pthread_mutex_unlock(&crew->mutex);
+				assert(status==0);
+			}
+			closedir(directory);
+		/* part three: if it was a file !*/
+		}else if(S_ISREG(filestat.st_mode)){
+			FILE *search;
+			char buffer[256],*bufptr,*searchptr;
+			search=fopen(work->path,"r");
+			if(search==NULL){
+			      printf("unable to open %s\n",\
+						      work->path);
+			      errno=EINVAL;
+			}else{
+				while(1){
+					bufptr=fgets(buffer,sizeof(buffer),search);
+					if(bufptr==NULL){
+						if(feof(search)) break;
+						if(ferror(search)){
+						      printf("unable to read %s\n",\
+									      work->path);
+						      break;
+						}
+					}
+					if((searchptr=strstr(buffer,work->string))!=NULL){
+						printf("thread %d found *|%s|*\
+									in %s \n",\
+									tran->thread_index,work->string,work->path);
+						break;
+					}
+				}
+				fclose(search);
+			}
+		/*part four: if it was other type */
+		}else{
+			printf("other type ... ( never process it !)\n");
+		}
+
+		free(work->path);
+		free(work);
+
+		pthread_mutex_lock(&crew->mutex);
+		crew->work_count--;
+		if(crew->work_count<=0){
+			printf("crew thread %d done\n",tran->thread_index);
+			status=pthread_mutex_unlock(&crew->mutex);
+			assert(status==0);
+			break;
+		}
+		pthread_mutex_unlock(&crew->mutex);
 	}
+
+	free(entry);
+	return NULL;
 }
