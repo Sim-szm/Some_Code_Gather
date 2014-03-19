@@ -49,6 +49,7 @@ typedef struct crew_tag{
 	pthead_mutex_t mutex;
 	pthread_cond_t start;
 	pthread_cond_t done;
+	work_t *first,*end;
 	int work_count;
 }crew_t,*crew_p;
 
