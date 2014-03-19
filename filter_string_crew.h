@@ -21,6 +21,8 @@
 #include <ptrhead.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <string.h>
 
 #define work_crew_size 4
 
