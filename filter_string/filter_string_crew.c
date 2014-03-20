@@ -17,6 +17,7 @@
 #include "filter_string_crew.h"
 
 int init_worker_crew(crew_t *crew,int crew_size){
+	/*this is bug wait to fix !*/
 	int status;
 	if(crew_size>=work_crew_size){
 		errno=EINVAL;
