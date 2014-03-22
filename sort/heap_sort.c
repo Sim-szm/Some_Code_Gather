@@ -65,6 +65,7 @@ void heap_sort(int array[],int heap_size){
 int main(int argc, char *argv[]){
 	int heap_size=11;
 	int array[]={4,6,3,13,12,1,9,10,11,2,5};
+	printf("堆排序效率：\n最差时间复杂度O(nlogn) \n最优时间复杂度 O(nlogn)\n平均时间复杂度(nlog n) \n最差空间复杂度O(n) total, O(1) auxiliary\n");
 	heap_sort(array,heap_size);
 	return EXIT_SUCCESS;
 }
