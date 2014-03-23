@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
 		return -1;
 	}
 	int status=init_worker_crew(&point,work_crew_size);
-	assert(status==0);
+//	assert(status==0);
 	crew_start(&point,argv[2],argv[1]);
 	return 0;
 }

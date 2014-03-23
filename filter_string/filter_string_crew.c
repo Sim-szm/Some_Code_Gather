@@ -63,7 +63,7 @@ void *thread_routine(void *arg){
 	/*Now there is work here, we should doing it !*/
 	while(1){
 		pthread_mutex_lock(&crew->mutex);
-		if(crew->first==NULL){
+		while(crew->first==NULL){
 			status=pthread_cond_wait(&crew->start,&crew->mutex);
 			assert(status==0);
 		}
@@ -228,7 +228,7 @@ int crew_start(crew_p crew,char *filepath,char *search_string){
 	crew->work_count++;
 	pthread_cond_signal(&crew->start);
 
-	if(crew->work_count>0){
+	while(crew->work_count>0){
 		pthread_cond_wait(&crew->done,&crew->mutex);
 	}
 	pthread_mutex_unlock(&crew->mutex);
