@@ -160,23 +160,39 @@ grammar_analysis& grammar_analysis::operator=(const grammar_analysis& src){
 }
 
 grammar_analysis& grammar_analysis::push_stack(const std::string& src){
-
+	if(src.empty())
+	      return *this;
+	std::string tmp=src;
+	tmp.replace(tmp.begin(),tmp.end(),tmp.rbegin(),tmp.rend());
+	analysis_stack.append(tmp);
+	return *this;
 }
 
 bool grammar_analysis::next(char ch,char cur){
-
+	if(search_char(ch,end_flag)!=-1){
+		if(ch==cur){
+			pop_stack();
+			input_stack.erase(0,1);
+			return true;
+		}else{
+			return false;
+		}
+	}
+	return false;
 }
 
 char grammar_analysis::pop_stack(){
-
+	char ch=this->analysis_stack[this->analysis_stack.size()-1];
+	this->analysis_stack.erase(this->analysis_stack.size()-1,1);
+	return ch;
 }
 
 char grammar_analysis::get_top_of_analysis_stack(){
-
+	return this->analysis_stack[this->analysis_stack.size()-1];
 }
 
 char grammar_analysis::get_current_of_input_stack(){
-
+	return this->input_stack[0];
 }
 
 bool grammar_analysis::final_print(){
