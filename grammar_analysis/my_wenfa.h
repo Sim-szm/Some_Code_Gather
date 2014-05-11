@@ -40,7 +40,7 @@ public:
 	bool final_print();
 
 	std::string get_first_set(char );
-	std::string get_str_first_set(const std::string& );
+	std::string get_first_set(const std::string& );//str
 	std::string get_follow_set(char );
 	std::string get_N_sub_right(int cur,const std::string& ,char ch);
 
@@ -54,7 +54,7 @@ public:
 	bool check_correct();
 	std::string del_repeated_ch(std::string& );
 	std::string del_char(char ch, std::string src);
-	int search_char(char ch,std::string& );
+	int search_char(char ch,std::string );
 	int str_sub_num(const std::string&);
 	char random_char(){
 		return rand()%25+'A';
@@ -72,10 +72,10 @@ private:
 	std::string *follow_set;
 	std::string **predicted_table;
 public:
-	friend std::ostream& std::operator<<(std::ostream& output ,grammar_analysis& dest);
-	friend std::istream& std::operator>>(std::istream& input ,grammar_analysis& source);
+	friend std::ostream& operator<<(std::ostream& output ,grammar_analysis& dest);
+	friend std::istream& operator>>(std::istream& input ,grammar_analysis& source);
 	grammar_analysis(const grammar_analysis&);
-	grammar_analysis& std::operator =(const grammar_analysis& );
+	grammar_analysis& operator =(const grammar_analysis& );
 };
 
 
