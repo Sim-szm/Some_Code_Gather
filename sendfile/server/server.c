@@ -43,6 +43,7 @@ int setnonblocking(int sockfd){
 
 
 int main(int argc, char *argv[]){
+
 	int listenfd,connfd,n;
 	int epoll_fd,cur_fd,newfd,number,stop;
 	struct epoll_event ev;
@@ -77,14 +78,19 @@ int main(int argc, char *argv[]){
 	ev.data.fd=listenfd;
 	ev.events=EPOLLIN | EPOLLET;
 	epoll_ctl(epoll_fd,EPOLL_CTL_ADD,listenfd,&ev);
+
 	cur_fd=1;stop=FALSE;
 	socklen_t len=sizeof(struct sockaddr_in);
+
 	while(!stop){
 		number=epoll_wait(epoll_fd,events,cur_fd,-1);
 		assert(number!=-1);
 		for(n=0;n<number;n++){
+
 			connfd=events[n].data.fd;
+
 			if(connfd==listenfd){
+
 				while((newfd=accept(listenfd,(struct sockaddr*)&client_address,&len))>0){
 					printf("connect with %s ,socket index %d\n",\
 								inet_ntoa(client_address.sin_addr),newfd);
@@ -97,20 +103,25 @@ int main(int argc, char *argv[]){
 					}
 					cur_fd++;
 				}
+
 				if(newfd==-1){
 					if(errno!=EAGAIN&&errno!=ECONNABORTED\
 								&&errno!=EPROTO&&errno!=EINTR){
 						perror("accept");
 					}
 				}
+
 				continue;
+
 			}else if(events[n].events & EPOLLOUT){
+
 				printf("start to sendfile !\n");
 				int ret=0,left=stat_buf.st_size;
 				file_ptr=open(file_name,O_RDONLY);
+
 				while(left>0){
 					ret=sendfile(connfd,file_ptr,NULL,BUF);
-					if(ret<0||errno==EAGAIN){
+					if(ret<0 && errno==EAGAIN){
 						continue;
 					}else if(ret==0){
 						break;
@@ -118,28 +129,37 @@ int main(int argc, char *argv[]){
 						left-=ret;
 					}
 				}
+
 				printf("sendfile over !\n");
 				close(file_ptr);
+
 				ev.data.fd=connfd;
 				epoll_ctl(epoll_fd,EPOLL_CTL_DEL,connfd,&ev);
+
 				cur_fd--;
 				close(connfd);
+
 			}else if(events[n].events & EPOLLIN){
+
 				char msg[100];
 				memset(msg,'\0',100);
 				int ret=recv(connfd,msg,100,0);
 				if(ret<=0){
 					close(connfd);
 				}
+
 				printf("recv from client : %s\n",msg);
+
 				ev.data.fd=connfd;
 				ev.events=EPOLLOUT|EPOLLET|EPOLLHUP;
 				epoll_ctl(epoll_fd,EPOLL_CTL_MOD,connfd,&ev);
+
 			}
 		}
 
 	}
 	close(listenfd);
 	return 0;
+
 }
 
