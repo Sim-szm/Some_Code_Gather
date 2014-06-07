@@ -30,7 +30,7 @@
 #define PORT 9527
 #define BUF 2048
 #define BACKLOG 10
-#define size 100
+#define size 1000
 #define TRUE 1
 #define FALSE 0
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
 					ev.events=EPOLLIN|EPOLLET|EPOLLHUP;
 					if(epoll_ctl(epoll_fd,EPOLL_CTL_ADD,newfd,&ev)==-1){
 						perror("epoll_ctl:add");
-						exit(0);
+						stop=TRUE;
 					}
 					cur_fd++;
 				}
@@ -159,6 +159,7 @@ int main(int argc, char *argv[]){
 
 	}
 	close(listenfd);
+	close(epoll_fd);
 	return 0;
 
 }
