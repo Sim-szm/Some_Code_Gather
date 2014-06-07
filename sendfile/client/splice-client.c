@@ -12,6 +12,7 @@
  * =====================================================================================
  */
 #define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,12 +21,17 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <assert.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+
 #define PORT 9527
+#define BUF 2048
+
 int main( int argc, char *argv[] ){
 
-	int sockfd;
+	int sockfd,ret;
+	int pipefd[2];
 	char SEND_BUF[100]={"hello server , I'm login in !"};
 	char RECV_BUF[2048];
 	struct sockaddr_in server;
@@ -42,20 +48,24 @@ int main( int argc, char *argv[] ){
 		exit(1);
 	}
 
-	int ret=send(sockfd,SEND_BUF,100,0);
+	ret=send(sockfd,SEND_BUF,100,0);
 
 	while(1){
-		ret=recv(sockfd,RECV_BUF,2048,0);
-		if(ret<0){
-			break;
-		}else if(ret==0){
-			break;
-		}else{
-			write(file_ptr,RECV_BUF,ret);
-			bzero(RECV_BUF,sizeof(RECV_BUF));
+
+		ret=pipe(pipefd);
+		ret=splice(sockfd,NULL,pipefd[1],NULL,BUF,\
+					SPLICE_F_MORE|SPLICE_F_NONBLOCK);
+		assert(ret!=-1);
+		ret=splice(pipefd[0],NULL,file_ptr,NULL,BUF,\
+					SPLICE_F_MORE|SPLICE_F_NONBLOCK);
+		if(ret==-1){
+		      break;
 		}
+
 	}
+
 	close(file_ptr);
 	close(sockfd);
+
 	return 0;
 }
