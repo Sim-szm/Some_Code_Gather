@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  client.c
+ *       Filename:  splice-client.c
  *        Version:  1.0
  *        Created:  2014年06月07日 16时31分14秒
  *       Revision:  none
@@ -33,7 +33,7 @@ int main( int argc, char *argv[] ){
 	int sockfd,ret;
 	int pipefd[2];
 	char SEND_BUF[100]={"hello server , I'm login in !"};
-	char RECV_BUF[2048];
+	char RECV_BUF[BUF];
 	struct sockaddr_in server;
 	const char* file_name=argv[1];
 
