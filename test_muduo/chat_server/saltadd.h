@@ -39,15 +39,38 @@ public :
 	void onMessageSalt(const muduo::net::TcpConnectionPtr& conn,
 				muduo::net::Buffer *buf,
 				muduo::Timestamp time_){
-		//...
+		while(buf->readableBytes() >= headerlen){
+			void* data = buf->peek();
+			int32_t header = *static_cast<const int32_t*> data;
+			int32_t data_len = muduo::net::sockets::networkToHost32(header); 
+			//data_len as the message size,also is the message_header
+			if(data_len > 65536 || data_len < 0){
+				LOG_ERR << "message length error"<<data_len;
+				conn->shutdown();//muduo use half-close , if it matters ,change to use close();
+				break;
+			}else if(buf->readableBytes() >= data_len + headerlen){
+				buf->retrieve(headerlen);
+				muduo->string messageback(buf->peek(),data_len);
+				messagecallback_(conn,messageback,time_);
+				buf->retrieve(data_len);
+			}else{
+				break;
+			}
+		}
 	}
 	void sendback(muduo::net::TcpConnection* conn,
 				const muduo::StringPiece& message){
-
+		muduo::net::Buffer buf;
+		int32_t data_len = static_cast<const int32_t>(message.size());
+		int32_t header = muduo::net::ockets::hostToNetwork32(data_len);
+		buf.append(&header,sizeof(int32_t));
+		buf.append(message.data(),message.size());
+		conn->send(&buf);
 
 	}
 private :
 	MessageCallback messagecallback_;
+	const static size_t headerlen = sizeof(int32_t);
 };
 
 #ifdef __cplusplus

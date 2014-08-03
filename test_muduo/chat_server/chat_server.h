@@ -60,6 +60,7 @@ private :
 	void onMessageBack(const TcpConnectionPtr&,
 				const muduo::base::string& message,
 				Timestamp){
+		//broadcast to all the Connectionlist
 		for(Conn_list::iterator it = conn_.begin();
 					it != conn_.end();
 					it++){
