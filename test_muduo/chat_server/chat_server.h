@@ -49,6 +49,7 @@ private :
 			 << (conn->connected() ? "connected":"connection failed");
 
 		if(conn->connected()){
+			conn->setTcpNoDelay(true);
 			conn_.insert(conn);
 		}else{
 			conn_.erase(conn);
