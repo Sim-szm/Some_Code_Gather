@@ -14,21 +14,17 @@
 #ifndef _CHAT_SERVER_H
 #define _CHAR_SERVER_H
 
-#ifdef __cpluspluc
-extern "C":
-{
-#endif
 
 #include <muduo/net/TcpServer.h>
 #include <muduo/net/EventLoop.h>
-#include <muduo/base/logging.h>
+#include <muduo/base/Logging.h>
 #include <boost/bind.hpp>
 #include <set>
 
+#include "saltadd.h"
+
 using namespace muduo;
 using namespace muduo::net;
-
-#include "saltadd.h"
 
 class ChatServer : boost::noncopyable{
 public : 
@@ -36,13 +32,13 @@ public :
 	ChatServer(EventLoop* loop,
 				const InetAddress& localaddr)
 	: 	chatserver_(loop,localaddr,"chat_server"),
-		salt_(boost::bind(&CharServer::onMessageBack,this,_1,_2,_3)){
+		salt_(boost::bind(&ChatServer::onMessageBack,this,_1,_2,_3)){
 		chatserver_.setConnectionCallback(
 				boost::bind(&ChatServer::onConnection,this,_1));
-		charsever_.setMessageCallback(
-				boost::bind(&ChatServer::onMessageSalt,&salt_,_1,_2,_3));
+		chatserver_.setMessageCallback(
+				boost::bind(&salt::onMessageSalt,&salt_,_1,_2,_3));
 	}
-	void chatstart{
+	void chatstart(){
 		chatserver_.start();
 	}
 
@@ -51,6 +47,7 @@ private :
 		LOG_INFO << conn->localAddress().toIpPort() << "<-"
 			 << conn->peerAddress().toIpPort() << "is"
 			 << (conn->connected() ? "connected":"connection failed");
+
 		if(conn->connected()){
 			conn_.insert(conn);
 		}else{
@@ -58,8 +55,8 @@ private :
 		}
 	}
 	void onMessageBack(const TcpConnectionPtr&,
-				const muduo::base::string& message,
-				Timestamp){
+				const muduo::string& message,
+				muduo::Timestamp){
 		//broadcast to all the Connectionlist
 		for(Conn_list::iterator it = conn_.begin();
 					it != conn_.end();
@@ -72,7 +69,5 @@ private :
 	typedef std::set<TcpConnectionPtr> Conn_list;
 	Conn_list conn_;
 };
-#ifdef __cplusplus
-}
-#endif
+
 #endif
