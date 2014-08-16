@@ -49,19 +49,21 @@ int main( int argc, char *argv[] ){
 	}
 
 	ret=send(sockfd,SEND_BUF,100,0);
-
+	ret=pipe(pipefd);
 	while(1){
 
-		ret=pipe(pipefd);
 		ret=splice(sockfd,NULL,pipefd[1],NULL,BUF,\
 					SPLICE_F_MORE|SPLICE_F_NONBLOCK);
-		assert(ret!=-1);
+		if(ret==0){
+			break;
+		}
 		ret=splice(pipefd[0],NULL,file_ptr,NULL,BUF,\
 					SPLICE_F_MORE|SPLICE_F_NONBLOCK);
 		if(ret==-1){
-		      break;
+			if(errno==EINTR || errno==EAGAIN)
+			      continue;
+			break;
 		}
-
 	}
 
 	close(file_ptr);
